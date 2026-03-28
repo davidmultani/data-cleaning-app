@@ -1,0 +1,57 @@
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Python compiled files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Distribution files
+dist/
+build/
+*.egg-info/
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# SECRETS — never commit these
+.env
+*.env
+*secret*
+*credential*
+azure_credentials.json
+
+# Data files — too large for Git
+*.csv
+*.xlsx
+*.xls
+*.parquet
+*.db
+*.sqlite
+
+# Keep sample data
+!sample_raw_data.csv
+!tests/data/*.csv
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editors
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Streamlit
+.streamlit/secrets.toml
+
+# Logs
+*.log
+logs/

@@ -1,0 +1,12 @@
+streamlit==1.32.0
+pandas==2.2.0
+numpy==1.26.4
+plotly==5.19.0
+openpyxl==3.1.2
+chardet==5.2.0
+sqlalchemy==2.0.27
+psycopg2-binary==2.9.9
+pymysql==1.1.0
+azure-storage-file-datalake==12.14.0
+python-dotenv==1.0.1
+pytest==8.0.0

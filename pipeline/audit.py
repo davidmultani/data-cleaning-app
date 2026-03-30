@@ -81,3 +81,11 @@ class AuditLog:
                     f"{entry['cols_after']}"
                     f"(removed {entry['cols_removed']})"
                 )
+            lines.append("")
+            # Empty string creates a blank line between entries
+        return "\n".join(lines)
+        # "\n".join(list) joins all strings with a newline between them
+
+    def clear(self):
+        """ Resets the log. Called when the user uploads a file. """
+        self.entries = []

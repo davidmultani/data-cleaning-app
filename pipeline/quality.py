@@ -140,7 +140,7 @@ def compute_quality_score(df: pd.DataFrame) -> dict:
             )
 
     consistency_score = round(
-        round(sum(consistency_scores) / len(consistency_scores), 1)
+        sum((consistency_scores) / len(consistency_scores), 1)
         if consistency_scores else 100.0
     )
     # Average the per-column score

@@ -9,7 +9,7 @@ PLOT_TYPES = ["Bar", "Line", "Scatter", "Histogram",
               "Box", "Pie", "Heatmap (Correlation)"]
 
 
-def get_column_group(df: pd.DataFrame) -> dict:
+def get_column_groups(df: pd.DataFrame) -> dict:
     # Categorizes columns by their data type.
     # Returns a dictionary with three lists:
     #   "numeric" - int and float columns

@@ -7,7 +7,7 @@ from pipeline.audit import AuditLog
 # Import AuditLog so each function can record what it did
 
 
-def compute_dafault_fills(df: pd.DataFrame) -> dict:
+def compute_default_fills(df: pd.DataFrame) -> dict:
     # Computes a sensible default fill value for every column that has nulls.
 
     # Returns a dictionary like:

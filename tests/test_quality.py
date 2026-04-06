@@ -42,7 +42,7 @@ def test_perfect_df_grade_is_a(perfect_df):
     assert result["grade"] == "A"
 
 
-def test_messy_df_score_lower(messy_df):
+def test_messy_df_scores_lower(messy_df):
     result = compute_quality_score(messy_df)
     assert result["overall"] < 90, (
         "A DataFrame with nulls and duplicates should score below 90%"
@@ -58,7 +58,7 @@ def test_completeness_reflects_missing_values(messy_df):
 
 def test_uniqueness_reflects_duplicates(messy_df):
     result = compute_quality_score(messy_df)
-    # Row 0 (Alice) and row 4 (Alce) are duplicates - 1 out of 5
+    # Row 0 (Alice) and row 4 (Alice) are duplicates - 1 out of 5
     # uniqueness = 4/5 = 80%
     assert result["uniqueness"]["score"] < 90
 

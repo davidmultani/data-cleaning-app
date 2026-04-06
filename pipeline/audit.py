@@ -18,19 +18,20 @@ class AuditLog:
 #       rows_before - row count before the transformation
 #       rows_after - row count after the transformation
 #       cols_before - column count before the transformation
-#       cols)after - column count after the transformation
+#       cols_after - column count after the transformation
 #       All row/col parameters are option (= None by default)
-    def log(self):
-        action: str
-        detail: str
-        rows_before: int = None
-        rows_after: int = None
-        cols_before: int = None
-        cols_after: int = None
+    def log(self,
+            action: str,
+            detail: str,
+            rows_before: int = None,
+            rows_after: int = None,
+            cols_before: int = None,
+            cols_after: int = None):
 
         entry = {
             "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "action": action,
+            "detail": detail,
             "rows_before": rows_before,
             "rows_after": rows_after,
             "cols_before": cols_before,
@@ -46,8 +47,8 @@ class AuditLog:
         # .append() adds the new dictionary to the end of the list.
         self.entries.append(entry)
 
-#   to_dateframe(self) converts all the log entries into a pandas dataframe.
-    def to_dateframe(self) -> pd.DataFrame:
+#   to_dataframe(self) converts all the log entries into a pandas dataframe.
+    def to_dataframe(self) -> pd.DataFrame:
         # returns an empty DataFrame, if the list is empty.
         if not self.entries:
             return pd.DataFrame(columns=[
@@ -69,16 +70,20 @@ class AuditLog:
         for i, entry in enumerate(self.entries, start=1):
             # enumerate(list, start=1) gives both the index and the value
             # i starts at 1 instead of 0 so the numbering looks natural
+
+            lines.append(f"Step {i}: [{entry['timestamp']}] {entry['action']}")
+            lines.append(f" -> {entry['detail']}")
+
             if entry["rows_removed"] is not None:
                 lines.append(
                     f" -> Rows: {entry['rows_before']} -> "
-                    f"{entry['rows_after']}"
+                    f"{entry['rows_after']} "
                     f"(removed {entry['rows_removed']})"
                 )
             if entry['cols_removed'] is not None:
                 lines.append(
                     f" -> Cols: {entry['cols_before']} -> "
-                    f"{entry['cols_after']}"
+                    f"{entry['cols_after']} "
                     f"(removed {entry['cols_removed']})"
                 )
             lines.append("")

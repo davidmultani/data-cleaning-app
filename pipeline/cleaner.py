@@ -27,7 +27,7 @@ def compute_default_fills(df: pd.DataFrame) -> dict:
     # - Categorical -> mode (most common value) because the most frequent
     # category is the best guess when no other information is available.
 
-    default = []
+    default = {}
     # Empty dictionary, we will add one entry per column that has nulls
 
     for col in df.columns:
@@ -108,7 +108,7 @@ def apply_fills(df: pd.DataFrame, fill_map: dict, audit_log: AuditLog = None) ->
             df[col] = df[col].bfill()
             # .bfill() propagates the next valid value backward
             # We chain bfill and after ffill to handle NaN at the very start
-            # (ffill can't fill first row bacause their is nothing before it)
+            # (ffill can't fill first row because their is nothing before it)
 
             if audit_log:
                 audit_log.log(action="Fill Null Values",
@@ -131,7 +131,7 @@ def apply_fills(df: pd.DataFrame, fill_map: dict, audit_log: AuditLog = None) ->
 
             if audit_log:
                 audit_log.log(action="Fill Null Values",
-                              detail=(f"Column '{col}':filled {n_missing} missing"
+                              detail=(f"Column '{col}': filled {n_missing} missing "
                                       f"value(s) with {fill_val}")
                               )
 
@@ -145,7 +145,7 @@ def apply_fills(df: pd.DataFrame, fill_map: dict, audit_log: AuditLog = None) ->
 
             if audit_log:
                 audit_log.log(action="Fill Null Values",
-                              detail=(f"Column '{col}': filled {n_missing} missing"
+                              detail=(f"Column '{col}': filled {n_missing} missing "
                                       f"value(s) with '{fill_val}'")
                               )
 
@@ -294,11 +294,11 @@ def drop_fully_empty_rows(df: pd.DataFrame,
     # Removes rows where every single column is NaN.
 
     # These rows carry zero information and are usually caused by
-    # extra blank lines at the bottom of the speadsheet.
+    # extra blank lines at the bottom of the spreadsheet.
 
     rows_before = len(df)
 
-    df.dropna(how=all)
+    df = df.dropna(how="all")
     # how="all" means: only drop a row if ALL values are NaN
     # (contrast with how="any" which drops if ANY value is NaN - too aggressive)
 
@@ -338,7 +338,7 @@ def drop_constant_columns(df: pd.DataFrame,
     if audit_log:
         audit_log.log(
             action="Drop Constant Columns",
-            detail=(f"Dropped {len(constant_cols)} constant column(s)"
+            detail=(f"Dropped {len(constant_cols)} constant column(s): "
                     f"{constant_cols}"),
             cols_before=cols_before,
             cols_after=cols_after
@@ -407,7 +407,7 @@ def cap_outliers_iqr(df: pd.DataFrame,
             if audit_log:
                 audit_log.log(
                     action="Cap Outliers",
-                    detail=(f"Column '{col}': caped {n_outliers} outlier(s)"
+                    detail=(f"Column '{col}': capped {n_outliers} outlier(s) "
                             f"to [{lower_fence:.2f}, {upper_fence:.2f}]")
                 )
     return df
@@ -467,6 +467,6 @@ def infer_and_convert_dtypes(df: pd.DataFrame,
         except Exception:
             pass
             # pass means "do nothing and continue"
-            # If datetimr conversion completely fails, leave the column alone
+            # If datetime conversion completely fails, leave the column alone
 
     return df

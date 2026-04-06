@@ -23,7 +23,7 @@ def compute_quality_score(df: pd.DataFrame) -> dict:
     # Weight: 15% - mixed types (some numbers, some strings in the
     # same column) suggest data was combined incorrectly.
 
-    results = []
+    results = {}
     issues = []
     # issues is a list of human-readable problem descriptions
     # shown to the user as warnings in the UI
@@ -32,7 +32,7 @@ def compute_quality_score(df: pd.DataFrame) -> dict:
 
     total_cells = df.shape[0] * df.shape[1]
     # Total number of individual data cells in the entire DataFrame
-    # shape[0] = rows, shape[1] = columns, multiple for total cells
+    # shape[0] = rows, shape[1] = columns, multiply for total cells
 
     missing_cells = int(df.isna().sum().sum())
     # df.isna() -> boolean DataFrame
@@ -54,7 +54,7 @@ def compute_quality_score(df: pd.DataFrame) -> dict:
 
         if pct < 70:
             issues.append(
-                f"Column '{col} is only {pct}% complete'"
+                f"Column '{col}' is only {pct}% complete "
                 f"({df[col].isna().sum()} missing values)"
             )
 
@@ -78,7 +78,7 @@ def compute_quality_score(df: pd.DataFrame) -> dict:
 
     if duplicate_rows > 0:
         issues.append(
-            f"{duplicate_rows} duplicate row(s) detected"
+            f"{duplicate_rows} duplicate row(s) detected "
             f"({round(100 * duplicate_rows / total_rows, 1)}% of all rows)"
         )
 
@@ -91,7 +91,7 @@ def compute_quality_score(df: pd.DataFrame) -> dict:
             dup_count = int(df[col].duplicated().sum())
             if dup_count > 0:
                 issues.append(
-                    f"Column '{col}' looks like an ID but has"
+                    f"Column '{col}' looks like an ID but has "
                     f"{dup_count} duplicate value(s)"
                 )
 
@@ -135,12 +135,12 @@ def compute_quality_score(df: pd.DataFrame) -> dict:
 
         if n_outliers > 0:
             issues.append(
-                f"Column '{col}' has {n_outliers} statistical outlier(s)"
+                f"Column '{col}' has {n_outliers} statistical outlier(s) "
                 f"({outliers_pct}% of values)"
             )
 
-    consistency_score = round(
-        sum((consistency_scores) / len(consistency_scores), 1)
+    consistency_score = (
+        round(sum(consistency_scores) / len(consistency_scores), 1)
         if consistency_scores else 100.0
     )
     # Average the per-column score
@@ -181,7 +181,7 @@ def compute_quality_score(df: pd.DataFrame) -> dict:
             validity_scores.append(dominant_pct)
 
             issues.append(
-                f"Column '{col}' contains mixed data types"
+                f"Column '{col}' contains mixed data types "
                 f"(dominant type is {dominant_pct}% of values)"
             )
         else:
@@ -201,8 +201,8 @@ def compute_quality_score(df: pd.DataFrame) -> dict:
     # -- OVERALL WEIGHTED SCORE --------------------------------
     overall = round(
         results["completeness"]["score"] * 0.40 +
-        results["consistency"]["score"] * 0.25 +
-        results["uniqueness"]["score"] * 0.20 +
+        results["uniqueness"]["score"] * 0.25 +
+        results["consistency"]["score"] * 0.20 +
         results["validity"]["score"] * 0.15,
         1
     )

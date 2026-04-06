@@ -28,7 +28,7 @@ def detect_encoding(file_bytes: bytes) -> str:
     # If chardet failed to detect anything, "utf-8" is the fallback
     # because it is the most common encoding for modern files
 
-    return encoding
+    return encoding or "utf-8"
 
 
 def load_file(file_obj) -> pd.DataFrame:
@@ -37,14 +37,24 @@ def load_file(file_obj) -> pd.DataFrame:
     # file_obj is the object returned by streamlit's file_uploader widget.
     # It has two important attributes:
     # .read() - returns the raw bytes of the file
-    # .name() - returns the original filename as a string
+    # .name - returns the original filename as a string
 
+    file_obj.seek(0)
     file_bytes = file_obj.read()
-    # .reads() loads the entire file content into memory as bytes
+    # .read() loads the entire file content into memory as bytes
     # we store it in file_bytes because we need it twice:
     # once for encoding detection and once for reading into pandas
 
-    filename = file_obj.name()
+    if isinstance(file_bytes, str):
+        file_bytes = file_bytes.encode("utf-8")
+
+    if len(file_bytes) == 0:
+        raise ValueError(
+            "The file appears to be empty. "
+            "Please try uploading it again. "
+        )
+
+    filename = file_obj.name
     # Gets the original filename like "sales_data.csv"
     # We use this to determine which reader to use
 
@@ -78,7 +88,7 @@ def load_file(file_obj) -> pd.DataFrame:
                          # before inferring columns types, giving more accurate dtypes
                          # Default True can cause "mixed types" warnings on large files
                          )
-    elif filename.endswith((".xlsx", "xls")):
+    elif filename.endswith((".xlsx", ".xls")):
         df = pd.read_excel(
             BytesIO(file_bytes),
             na_values=na_values
@@ -87,7 +97,7 @@ def load_file(file_obj) -> pd.DataFrame:
         )
     else:
         raise ValueError(
-            f"Unsupported file type: {filename}"
+            f"Unsupported file type: {filename}. "
             "Please upload a CSV or Excel file."
         )
         # raise stop execution and sends their error message
@@ -146,9 +156,9 @@ def profile_dataframe(df: pd.DataFrame) -> pd.DataFrame:
 
         }
         )
-        return pd.DataFrame(rows)
-        # Convert the list of dictionaries into a DataFrame
-        # Dictionary keys become column names automatically
+    return pd.DataFrame(rows)
+    # Convert the list of dictionaries into a DataFrame
+    # Dictionary keys become column names automatically
 
 ### --- DATABASE LOADING --- ###
 
@@ -216,12 +226,12 @@ def get_table_names(engine) -> list:
 
 
 def load_table_from_db(engine, table_name: str,
-                       limit: int = 10000) -> pd.DataFrame:
+                       limit: int = 100000) -> pd.DataFrame:
     # Loads all rows from a database table into a DataFrame.
     # limit protects you from accidentally loading a table with
     # 50 million rows and crashing your machine, Default is 100000
     # which is large enough for most analytical work.
-    query = text(f"Select * FROM {table_name} LIMIT :limit")
+    query = text(f"SELECT * FROM {table_name} LIMIT :limit")
     # text() marks this as a raw SQL string
     # :limit is a bind parameter - SQLAlchemy replaces it safely
     # This prevents SQL injection attacks

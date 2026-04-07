@@ -17,6 +17,8 @@ from pipeline.audit import AuditLog
 
 
 def render():
+    if "cleaning_done" not in st.session_state:
+        st.session_state["cleaning_done"] = False
     st.header("Step 2 - Clean Your Data")
 
     # ---- GUARD: require data to be loaded first ---------------------
@@ -224,7 +226,10 @@ def render():
         st.subheader("Data Quality Score")
 
         q1, q2, q3 = st.columns(3)
-        q1.metric("Overall Score", f"{quality['overall']}%")
+        if quality and 'overall' in quality:
+            q1.metric("Overall Score", f"{quality['overall']}%")
+        else:
+            q1.metric("Overall Score", "N/A")
         q2.metric("Grade", quality["grade"])
         q3.metric("Issues Found", quality["issue_count"])
 
@@ -284,7 +289,7 @@ def render():
             st.dataframe(log_df, use_container_width=True)
 
             st.download_button(
-                label="Download Audi Log",
+                label="Download Audit Log",
                 data=audit_log.to_text_report(),
                 file_name="audit_log.txt",
                 mime="text/plain"

@@ -41,6 +41,11 @@ def load_file(file_obj) -> pd.DataFrame:
 
     file_obj.seek(0)
     file_bytes = file_obj.read()
+    if file_obj.size > 500_000_000:
+        df = pd.read_csv(BytesIO(file_obj), chunksize=100000)
+        df = pd.concat(df)
+        return df
+
     # .read() loads the entire file content into memory as bytes
     # we store it in file_bytes because we need it twice:
     # once for encoding detection and once for reading into pandas

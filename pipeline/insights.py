@@ -56,7 +56,7 @@ def apply_filters(df: pd.DataFrame, filters: dict) -> pd.DataFrame:
             # df[boolean_series] keeps only the True rows
 
         elif isinstance(condition, list) and len(condition) > 0:
-            df = df[df[col].isna(condition)]
+            df = df[df[col].isin(condition)]
             # isna(list) returns True for rows whose value is in the list
 
     return df

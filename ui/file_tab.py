@@ -61,32 +61,62 @@ def render():
         if uploaded_file is not None:
             # Only try to process the file is one has been choosen
 
-            with st.spinner("Reading file..."):
-                # st.spinner() shows a loading animation while the code inside runs
-                # "with" is a context manager - the spinner shows for the duration
+            # FIX: WHY THIS CHECK IS NEEDED
+            #
+            # Streamlit reruns the ENTIRE app script from top to bottom every
+            # time the user interacts with ANY widget - including sidebar
+            # sliders on the Insights tab, checkboxes on the Clean tab, etc.
+            #
+            # WITHOUT this check, the flow on every rerun was:
+            # 1. User moves a slider on Insights tab
+            # 2. Streamlit reruns app.py
+            # 3. file_tab.render() runs again
+            # 4. uploaded_file is still not None (file is still "uploaded")
+            # 5. load_file() runs again, _save_dataframe_to_session() runs
+            # 6. _save_dataframe_to_session() sets cleaned_df = None
+            # 7. Insights tab now sees cleaned_df = None -> shows warning
+            #
+            # WITH this check:
+            #   - We compare the current file's name to what's already stored
+            #     in session_state["source_name"]
+            #   - If they match, the file is already loaded -> skips reload
+            #   - If they differ, it's a new file -> load it fresh
+            #
+            # This means _save_dataframe_to_session() (which resets cleaned_df)
+            # only runs when a genuinely new file is uploaded, not on every
+            # widget interaction anywhere in the app.
 
-                try:
-                    df = load_file(uploaded_file)
-                    # Call our loader function - returns a DataFrame
+            if st.session_state.get("source_name") != uploaded_file.name:
+                # st.session_state.get("source_name") safety retrieves the same
+                # of the last loaded file. Returns None is no file loaded yet.
+                # If the name matches the current file, we skip reloading.
 
-                    _save_dataframe_to_session(df, uploaded_file.name)
-                    # Save to session state using out helper below
+                with st.spinner("Reading file..."):
+                    # st.spinner() shows a loading animation while the code inside runs
+                    # "with" is a context manager - the spinner shows for the duration
 
-                    st.success(
-                        f" Loaded **{uploaded_file.name}** - "
-                        f"{df.shape[0]:,} rows x {df.shape[1]} columns"
-                    )
-                    # :, inside f-string formats numbers with commas
-                    # 10000 becomes 10,000
+                    try:
+                        df = load_file(uploaded_file)
+                        # Call our loader function - returns a DataFrame
 
-                except Exception as e:
-                    st.error(f"Failed to load file: {e}")
-                    # st.error() shows a red error banner
-                    # str(e) converts the exception to a readable message
-                    return
+                        _save_dataframe_to_session(df, uploaded_file.name)
+                       # Save to session state using out helper below
+
+                        st.success(
+                            f" Loaded **{uploaded_file.name}** - "
+                            f"{df.shape[0]:,} rows x {df.shape[1]} columns"
+                        )
+                        # :, inside f-string formats numbers with commas
+                        # 10000 becomes 10,000
+
+                    except Exception as e:
+                        st.error(f"Failed to load file: {e}")
+                        # st.error() shows a red error banner
+                        # str(e) converts the exception to a readable message
+                        return
                     # Stop rendering if loading failed
 
-         # --- OPTION B: DATABASE CONNECTION ------------------------------
+     # --- OPTION B: DATABASE CONNECTION ------------------------------
     else:
         st.subheader("Database Connection")
 
@@ -184,7 +214,8 @@ def render():
                         engine = st.session_state["db_engine"]
 
                         if custom_sql.strip():
-                            # .strip() removes whitespaces - empty after strip = no query
+                            # .strip() removes whitespaces
+                            #  empty after strip = no query entered
                             df = run_custom_sql(engine, custom_sql)
 
                         else:

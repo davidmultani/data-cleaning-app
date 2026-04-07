@@ -452,8 +452,8 @@ def infer_and_convert_dtypes(df: pd.DataFrame,
 
         # --- Try datetime conversion ---
         try:
-            converted_dt = pd.to_datetime(df[col], infer_datetime_format=True,
-                                          errors="coerce")
+            converted_dt = pd.to_datetime(
+                df[col], format="mixed", errors="coerce")
             success_rate_dt = converted_dt.notna().mean()
 
             if success_rate_dt >= 0.8:

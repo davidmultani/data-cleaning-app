@@ -18,6 +18,9 @@ def render():
 
     if ("cleaned_df" not in st.session_state or
             st.session_state["cleaned_df"] is None):
+        # Clear the sidebar if no data is ready
+        with st.sidebar:
+            st.empty()
         st.warning("⚠️ Please clean your data first.")
         return
 
@@ -33,14 +36,24 @@ def render():
 
         plot_type = st.selectbox("Chart type", options=PLOT_TYPES)
 
+        x_default = 0
+        if groups["categorical"]:
+            first_cat = groups["categorical"][0]
+            if first_cat in groups["all"]:
+                x_default = groups["all"].index(first_cat)
+
         x_col = st.selectbox(
             "X axis",
             options=groups["all"],
-            index=0
-            # index=0 selects the first item bu default
+            index=x_default
+            # index=x_default selects the first categorical column by default
         )
 
-        y_options = groups["numeric"] if groups["numeric"] else groups["all"]
+        numeric_non_id = [
+            col for col in groups["numeric"]
+            if "id" not in col.lower()
+        ]
+        y_options = numeric_non_id if numeric_non_id else groups["numeric"]
         y_col = st.selectbox("Y axis", options=y_options)
 
         st.divider()
@@ -235,7 +248,7 @@ def _build_chart(plot_type, plot_df, x_col, y_col, color, full_df, groups):
             title=f"Distribution of {y_col}",
             template="plotly_white",
             points="outliers"
-            # points="outliers shows individual outlier points as dots"
+            # points="outliers" shows individual outlier points as dots
         )
     elif plot_type == "Pie":
         if x_col not in groups["categorical"]:
